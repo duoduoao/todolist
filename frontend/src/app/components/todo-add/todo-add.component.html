@@ -1,0 +1,19 @@
+<!-- src/app/components/todo-add/todo-add.component.html -->
+
+<form class="todo-add-form" (ngSubmit)="addTodo()">
+  <input
+    type="text"
+    [(ngModel)]="title"
+    name="title"
+    class="todo-add-input"
+    placeholder="Add new todo"
+    required
+  />
+  <button
+    type="submit"
+    class="todo-add-button"
+    [disabled]="!title.trim()"
+  >
+    Add
+  </button>
+</form>

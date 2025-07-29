@@ -1,0 +1,4 @@
+<!-- src/app/app.component.html -->
+<h1>TODO List</h1>
+<app-todo-add (todoAdded)="todoList.loadTodos()"></app-todo-add>
+<app-todo-list #todoList></app-todo-list>

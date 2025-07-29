@@ -1,0 +1,17 @@
+<ul class="todo-list">
+  <li *ngFor="let todo of todos" class="todo-item">
+    <span class="todo-item-text">{{ todo.title }}</span>
+    <button
+      type="button"
+      class="todo-item-button"
+      (click)="onDelete(todo.id)"
+      aria-label="Delete todo"
+    >
+      &times;
+    </button>
+  </li>
+
+  <li *ngIf="todos.length === 0" class="todo-list-empty">
+    No todos yet.
+  </li>
+</ul>

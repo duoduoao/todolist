@@ -1,0 +1,14 @@
+{
+  "name": "todolist",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install-frontend": "npm install --prefix frontend",
+    "start-frontend": "npm start --prefix frontend",
+    "start-backend": "dotnet run --project backend/backend//backend.csproj",
+    "start": "concurrently \"npm run start-backend\" \"npm run start-frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}

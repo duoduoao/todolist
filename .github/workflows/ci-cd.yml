@@ -1,0 +1,146 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main     # dev environment here
+      - master
+      - uat
+      - prod
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - uat
+          - prod
+
+env:
+  BUILD_CONFIGURATION: Release
+
+jobs:
+  build-backend:
+    name: Build and Test Backend
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet restore ./backend/backend/backend.csproj
+      - run: dotnet build ./backend/backend/backend.csproj --configuration ${{ env.BUILD_CONFIGURATION }}
+      - run: dotnet test ./backend/backend.Tests/backend.Tests.csproj --configuration ${{ env.BUILD_CONFIGURATION }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: backend/backend/bin/${{ env.BUILD_CONFIGURATION }}
+
+  build-frontend:
+    name: Build and Test Frontend
+    runs-on: ubuntu-latest
+    needs: build-backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          cd frontend
+          npm ci
+          npm test
+          npm run build -- --configuration production
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+  build-push-backend-docker:
+    runs-on: ubuntu-latest
+    needs: build-backend    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Image
+        run: |
+          if [ "${{ github.ref_name }}" = "prod" ]; then
+            DOCKERFILE="backend/Dockerfile.prod"
+          elif [ "${{ github.ref_name }}" = "uat" ]; then
+            DOCKERFILE="backend/Dockerfile.uat"
+          else
+            DOCKERFILE="backend/Dockerfile.dev"
+          fi
+
+          docker build -f $DOCKERFILE -t duoduo0103/todolist-backend:${{ github.ref_name }} backend/
+          docker push duoduo0103/todolist-backend:${{ github.ref_name }}
+          
+  build-push-frontend-docker:
+    name: Build and Push Frontend Docker Image
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: ./frontend/dist
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - run: |
+          docker build -f frontend/Dockerfile -t duoduo0103/todolist-frontend:${{ github.ref_name }} ./frontend
+          docker push duoduo0103/todolist-frontend:${{ github.ref_name }}
+
+  deploy-dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    needs: [build-push-backend-docker, build-push-frontend-docker]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    environment:
+      name: dev
+    steps:
+      - name: Deploy backend container to Dev
+        run: echo "Skipping deploy step for demo project."
+
+      - name: Deploy frontend container to Dev
+        run: echo "Skipping deploy step for demo project."
+
+  deploy-uat:
+    name: Deploy to UAT
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/uat') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'uat')
+    environment:
+      name: uat
+    steps:
+      - name: Deploy backend container to UAT
+        run: echo "Skipping deploy step for demo project."
+
+      - name: Deploy frontend container to UAT
+        run: echo "Skipping deploy step for demo project."
+
+  deploy-prod:
+    name: Deploy to Prod
+    runs-on: ubuntu-latest
+    needs: deploy-uat
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/prod') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    environment:
+      name: prod
+    steps:
+      - name: Deploy backend container to Prod
+        run: echo "Skipping deploy step for demo project."
+
+      - name: Deploy frontend container to Prod
+        run: echo "Skipping deploy step for demo project."
+        

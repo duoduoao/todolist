@@ -1,0 +1,34 @@
+# Stage 1: Build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
+
+# Copy only the project file(s) to leverage Docker cache on restore
+COPY ["backend/backend.csproj", "backend/"]
+
+# Restore dependencies
+RUN dotnet restore "backend/backend.csproj"
+
+# Copy the full source code
+COPY . .
+
+WORKDIR /app/backend
+
+# Publish the application, no self-contained to produce portable output
+RUN dotnet publish "backend.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Stage 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+
+# Copy the published output from build stage
+COPY --from=build /app/publish .
+
+# Set environment variable (change as needed per environment)
+ENV DOTNET_ENVIRONMENT=Development
+
+# Expose ports - match app settings
+EXPOSE 8080
+EXPOSE 8081
+
+# Run the app 
+ENTRYPOINT ["dotnet", "backend.dll"]

@@ -1,0 +1,28 @@
+﻿# Stage 1: Build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
+
+COPY ["backend/backend.csproj", "backend/"]
+
+RUN dotnet restore "backend/backend.csproj"
+
+COPY . .
+
+WORKDIR /app/backend
+
+# Publish in Release mode for UAT
+RUN dotnet publish "backend.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Stage 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+
+COPY --from=build /app/publish .
+
+# Set environment to UAT
+ENV DOTNET_ENVIRONMENT=UAT
+
+EXPOSE 8080
+EXPOSE 8081
+
+ENTRYPOINT ["dotnet", "backend.dll"]

@@ -1,0 +1,69 @@
+# ========================
+# Backend - .NET / Visual Studio
+# ========================
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+
+# Visual Studio cache folder
+.vs/
+
+# NuGet packages
+packages/
+*.nupkg
+*.snupkg
+
+# Test results
+TestResults/
+
+# Build logs
+*.log
+
+# Rider IDE files
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# ========================
+# Frontend - Angular / Node.js
+# ========================
+
+# Dependency directory
+frontend/node_modules/
+
+# Angular build output
+frontend/dist/
+
+# Angular environment files sometimes generated dynamically
+#frontend/src/environments/environment.*.ts
+
+# ========================
+# Other
+# ========================
+
+# Docker Compose override files (optional)
+docker-compose.override.yml
+
+# Logs and caches
+*.log
+*.cache
+frontend/.angular/cache/
+
+# Generated files
+*.pdb
+*.exe
+*.dll
+
+# Local env files
+.env
+node_modules/
