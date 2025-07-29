@@ -55,23 +55,22 @@ Built with the latest Angular frontend and .NET 8 Web API backend, this project 
 
 ### Run Locally
 
-#### 1. Install Frontend Dependencies
+#### 1. Install Frontend Dependencies in Root
 
 From the **Root** directory, run:
-`npm run install-frontend`
 
-This runs `npm install` inside the `frontend` directory to install all frontend packages.
+`npm run install-frontend`
 
 
 #### 2. Install `concurrently` in Root
 
-`concurrently` lets you run frontend and backend servers simultaneously. Install it as a dev dependency in Root:
+`concurrently` lets you run frontend and backend servers simultaneously. Install it as a dev dependency in **Root**:
 
 `npm install concurrently --save-dev`
 
 #### 3. Start Both Backend and Frontend
 
-Run from the Root folder:
+Run from the **Root** folder:
 
 `npm start`
 
